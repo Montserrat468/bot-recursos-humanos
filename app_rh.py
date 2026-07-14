@@ -52,7 +52,7 @@ if pregunta:
     
     # Usamos el modelo global oficial
     respuesta = st.session_state.cliente_ia.models.generate_content(
-        model='gemini-2.5-flash',
+        model='gemini-2.0-flash',
         contents=pregunta,
         config=configuracion
     )
