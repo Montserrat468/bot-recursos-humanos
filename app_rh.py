@@ -1,18 +1,19 @@
 import streamlit as st
-import google.generativeai as genai
+import os
+from google import genai
 import PyPDF2
 
-# 1. Configuración visual
+# 1. Configuración de página
 st.set_page_config(page_title="Asistente RH", page_icon="💼")
 
 st.sidebar.title("🔑 Configuración")
-api_key_usuario = st.sidebar.text_input("Introduce tu Gemini API Key:", type="password")
+api_key_usuario = st.sidebar.text_input("Introduce tu Gemini API Key (Empieza con AQ.):", type="password")
 st.sidebar.markdown("[¿No tienes una clave? Consíguela gratis aquí](https://aistudio.google.com/)")
 
 st.title("💼 Tu Asistente Virtual de Recursos Humanos")
 st.write("¡Hola! Cargaré el manual interno para responder tus dudas.")
 
-# 2. Leer el PDF de forma segura
+# 2. Leer el PDF
 @st.cache_data
 def leer_pdf(ruta_archivo):
     try:
@@ -29,7 +30,7 @@ def leer_pdf(ruta_archivo):
 
 texto_manual = leer_pdf("manual.pdf")
 
-# 3. Historial del chat
+# 3. Historial
 if "historial" not in st.session_state:
     st.session_state.historial = []
 
@@ -50,9 +51,12 @@ if pregunta:
         st.session_state.historial.append({"rol": "assistant", "texto": error_msg})
     else:
         try:
-            # Conector clásico compatible con las nuevas llaves de formato largo (AQ.)
-            genai.configure(api_key=api_key_usuario)
-            model = genai.GenerativeModel('gemini-1.5-flash')
+            # TRUCO MAESTRO: Forzamos al sistema a registrar la clave en el entorno global de Python
+            # Esto soluciona el error 401 del formato AQ. en servidores en la nube
+            os.environ["GEMINI_API_KEY"] = api_key_usuario.strip()
+            
+            # Inicializamos el cliente sin pasarle parámetros para que tome la variable global limpia
+            cliente_ia = genai.Client()
             
             contexto = f"""
             Eres un asistente experto de Recursos Humanos. Responde de forma muy amable.
@@ -65,12 +69,16 @@ if pregunta:
             {pregunta}
             """
             
-            respuesta = model.generate_content(contexto)
+            # Usamos el modelo estable actual
+            respuesta = cliente_ia.models.generate_content(
+                model='gemini-2.5-flash',
+                contents=contexto
+            )
             
             st.chat_message("assistant").markdown(respuesta.text)
             st.session_state.historial.append({"rol": "assistant", "texto": respuesta.text})
             
         except Exception as error_general:
-            msg_fallo = f"❌ Error de conexión: {str(error_general)}. Verifica los caracteres de tu clave."
+            msg_fallo = f"❌ Error de comunicación: {str(error_general)}. Asegúrate de copiar la clave completa."
             st.chat_message("assistant").markdown(msg_fallo)
             st.session_state.historial.append({"rol": "assistant", "texto": msg_fallo})
