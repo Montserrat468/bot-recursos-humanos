@@ -46,15 +46,23 @@ if pregunta:
     st.chat_message("user").markdown(pregunta)
     st.session_state.historial_pantalla.append({"rol": "user", "texto": pregunta})
     
-    configuracion = types.GenerateContentConfig(
-        system_instruction=f"Eres un asistente experto de Recursos Humanos. Responde de manera amable usando ÚNICAMENTE esta información del manual de la empresa: {texto_manual}. Si no está en el manual, di que no tienes la información."
-    )
+    # Creamos un bloque de contenido combinando el contexto del manual y la duda del usuario
+    contexto_y_pregunta = f"""
+    Eres un asistente experto de Recursos Humanos. Basándote ÚNICAMENTE en la siguiente información del manual de la empresa, responde la duda del usuario de forma amable. Si la respuesta no se encuentra en el texto, di amablemente que no cuentas con esa información.
     
-    # Usamos la variable correcta y el modelo oficial de producción
+    ---
+    MANUAL DE LA EMPRESA:
+    {texto_manual}
+    ---
+    
+    PREGUNTA DEL COLABORADOR:
+    {pregunta}
+    """
+    
+    # Llamamos al modelo pasándole todo en el content normal (sin system_instruction pesada)
     respuesta = st.session_state.cliente_ia.models.generate_content(
         model='gemini-2.5-flash',
-        contents=pregunta,
-        config=configuracion
+        contents=contexto_y_pregunta
     )
     
     st.chat_message("assistant").markdown(respuesta.text)
