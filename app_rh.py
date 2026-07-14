@@ -50,7 +50,7 @@ if pregunta:
     
     # Enviamos la petición usando el modelo oficial estable
     respuesta = st.session_state.cliente_ia.models.generate_content(
-        model='gemini-3.5-flash',
+        model='gemini-2.0-flash',
         contents=pregunta,
         config=configuracion
     )
