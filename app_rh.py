@@ -50,9 +50,9 @@ if pregunta:
         system_instruction=f"Eres un asistente experto de Recursos Humanos. Responde de manera amable usando ÚNICAMENTE esta información del manual de la empresa: {texto_manual}. Si no está en el manual, di que no tienes la información."
     )
     
-    # Usamos el modelo global oficial
+    # Usamos el modelo global oficial de producción
     respuesta = st.session_state.cliente_ia.models.generate_content(
-        model='gemini-2.0-flash',
+        model='gemini-2.5-flash',
         contents=pregunta,
         config=configuracion
     )
