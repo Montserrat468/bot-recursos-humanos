@@ -9,9 +9,9 @@ st.set_page_config(page_title="Asistente RH", page_icon="💼")
 st.title("💼 Tu Asistente Virtual de Recursos Humanos")
 st.write("¡Hola! Hazme cualquier pregunta sobre el manual de colaboradores.")
 
-# 2. Inicializa el cliente moderno de Google (Pega tu llave aquí)
+# 2. Inicializa el cliente moderno de Google (leerá la clave automáticamente de los secretos)
 if "cliente_ia" not in st.session_state:
-    st.session_state.cliente_ia = genai.Client(api_key="AQ.Ab8RN6JxFdySkzHoGvU34rhMI_i7TTHpOEctZR0glz5AioRAuQ")
+    st.session_state.cliente_ia = genai.Client()
 
 # 3. Función para leer el archivo PDF
 @st.cache_data
