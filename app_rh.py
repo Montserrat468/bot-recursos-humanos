@@ -71,9 +71,9 @@ if pregunta:
             {pregunta}
             """
             
-            # Llamamos al modelo oficial estable
+            # Llamamos al modelo ultra-compatiblepara este tipo de llaves
             respuesta = cliente_ia.models.generate_content(
-                model='gemini-2.5-flash',
+                model='gemini-1.5-flash',
                 contents=contexto
             )
             
