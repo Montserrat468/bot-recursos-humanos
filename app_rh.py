@@ -48,9 +48,9 @@ if pregunta:
         system_instruction=f"Eres un asistente experto de Recursos Humanos. Responde de manera amable usando ÚNICAMENTE esta información del manual de la empresa: {texto_manual}. Si no está en el manual, di que no tienes la información."
     )
     
-    # Enviamos la petición usando el modelo compatiblede la libreria
+    # usamos el modelo estándar compatible de la librería
     respuesta = st.session_state.cliente_ia.models.generate_content(
-        model='gemini-1.5-flash',
+        model='gemini-2.5-flash',
         contents=pregunta,
         config=configuracion
     )
