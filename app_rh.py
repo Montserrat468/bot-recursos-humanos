@@ -13,9 +13,9 @@ st.write("¡Hola! Hazme cualquier pregunta sobre el manual de colaboradores.")
 if "GEMINI_API_KEY" in st.secrets:
     os.environ["GEMINI_API_KEY"] = st.secrets["GEMINI_API_KEY"]
 
-# Inicializa el cliente moderno de Google de manera limpia
+# Inicializa el cliente moderno de Google con llave directapara la nube
 if "cliente_ia" not in st.session_state:
-    st.session_state.cliente_ia = genai.Client()
+    st.session_state.cliente_ia = genai.Client(api_key="AQ.Ab8RN6JxFdySkzHoGvU34rhMI_i7TTHpOEctZR0glz5AioRAuQ")
 
 # 3. Función para leer el archivo PDF
 @st.cache_data
