@@ -69,9 +69,9 @@ if pregunta:
             {pregunta}
             """
             
-            # Usamos el modelo estable actual
+            # Usamos el modelo estandar y compatible del catálogo actual
             respuesta = cliente_ia.models.generate_content(
-                model='gemini-2.5-flash',
+                model='gemini-1.5-flash',
                 contents=contexto
             )
             
