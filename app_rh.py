@@ -68,9 +68,9 @@ if pregunta:
             {pregunta}
             """
             
-            # El nombre de modelo oficial absoluto para la API estable en 2026
+            # El modelo insignia actual para la versión estable de la API
             respuesta = cliente_ia.models.generate_content(
-                model='gemini-2.5-flash',
+                model='gemini-2.0-flash',
                 contents=contexto
             )
             
