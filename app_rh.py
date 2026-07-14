@@ -51,10 +51,10 @@ if pregunta:
         st.session_state.historial.append({"rol": "assistant", "texto": error_msg})
     else:
         try:
-            # Configuramos la variable de entorno para la llave AQ.
+            # Configuración limpia de la variable de entorno
             os.environ["GEMINI_API_KEY"] = api_key_usuario.strip()
             
-            # Inicializamos el cliente moderno
+            # Inicialización del cliente oficial
             cliente_ia = genai.Client()
             
             contexto = f"""
@@ -68,9 +68,9 @@ if pregunta:
             {pregunta}
             """
             
-            # SOLUCIÓN INVENTADA: Eliminamos el parámetro 'model'. 
-            # La librería 'google-genai' elegirá automáticamente el modelo activo en 2026.
+            # El nombre de modelo oficial absoluto para la API estable en 2026
             respuesta = cliente_ia.models.generate_content(
+                model='gemini-2.5-flash',
                 contents=contexto
             )
             
@@ -78,6 +78,6 @@ if pregunta:
             st.session_state.historial.append({"rol": "assistant", "texto": respuesta.text})
             
         except Exception as error_general:
-            msg_fallo = f"❌ Error de comunicación: {str(error_general)}. Revisa tu conexión."
+            msg_fallo = f"❌ Error de comunicación: {str(error_general)}."
             st.chat_message("assistant").markdown(msg_fallo)
             st.session_state.historial.append({"rol": "assistant", "texto": msg_fallo})
