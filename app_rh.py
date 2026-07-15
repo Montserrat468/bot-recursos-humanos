@@ -69,9 +69,9 @@ if pregunta:
             {pregunta}
             """
             
-            # Petición al modelo oficial estable
+            # cambiamos el modelo con la cuota libre en el nivel gratuito
             respuesta = cliente_ia.models.generate_content(
-                model='gemini-2.0-flash',
+                model='gemini-1.5-flash',
                 contents=contexto
             )
             
