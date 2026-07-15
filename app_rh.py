@@ -3,76 +3,83 @@ import os
 from google import genai
 import PyPDF2
 
-# [Se mantiene igual la sección de configuración de página y lectura del PDF...]
+# 1. Configuración de página de Streamlit
+st.set_page_config(page_title="Asistente RH", page_icon="💼")
 
-# Modificación en la entrada de clave de la barra lateral para permitir múltiples claves
+# 2. Configuración de la barra lateral (Se declara la variable api_key_usuario)
 st.sidebar.title("🔑 Configuración")
-api_input = st.sidebar.text_input(
-    "Introduce tus Gemini API Keys (separadas por comas si tienes más de una):", 
-    type="password"
-)
-st.sidebar.markdown("[Consigue tus claves gratis aquí](https://aistudio.google.com/)")
+api_key_usuario = st.sidebar.text_input("Introduce tu Gemini API Key:", type="password")
+st.sidebar.markdown("[¿No tienes una clave? Consíguela gratis aquí](https://aistudio.google.com/)")
 
-# ... [Se mantiene igual la lógica de lectura de PDF e historial de chat] ...
+st.title("💼 Tu Asistente Virtual de Recursos Humanos")
+st.write("¡Hola! Cargaré el manual interno para responder tus dudas.")
 
+# 3. Leer el PDF de forma segura
+@st.cache_data
+def leer_pdf(ruta_archivo):
+    try:
+        texto = ""
+        with open(ruta_archivo, 'rb') as archivo:
+            lector = PyPDF2.PdfReader(archivo)
+            for pagina in lector.pages:
+                texto_pagina = pagina.extract_text()
+                if texto_pagina:
+                    texto += texto_pagina
+        return texto
+    except Exception as e:
+        return f"Error al leer el PDF: {e}"
+
+texto_manual = leer_pdf("manual.pdf")
+
+# 4. Inicializar e imprimir el historial del chat
+if "historial" not in st.session_state:
+    st.session_state.historial = []
+
+for mensaje in st.session_state.historial:
+    with st.chat_message(mensaje["rol"]):
+        st.markdown(mensaje["texto"])
+
+# 5. Declaración de la variable 'pregunta' (Debe ir ANTES de evaluarse)
+pregunta = st.chat_input("Escribe tu duda sobre el manual aquí...")
+
+# 6. Evaluación de la variable 'pregunta' (Ahora la variable ya existe en memoria)
 if pregunta:
+    # Mostramos la pregunta del usuario en la interfaz
     st.chat_message("user").markdown(pregunta)
     st.session_state.historial.append({"rol": "user", "texto": pregunta})
     
-    if not api_input:
-        error_msg = "⚠️ Por favor, introduce al menos una Gemini API Key en la barra lateral."
+    if not api_key_usuario:
+        error_msg = "⚠️ Por favor, introduce tu Gemini API Key en la barra lateral izquierda."
         st.chat_message("assistant").markdown(error_msg)
         st.session_state.historial.append({"rol": "assistant", "texto": error_msg})
     else:
-        # Procesamos la entrada: separamos las claves por comas y limpiamos espacios
-        lista_claves = [clave.strip() for clave in api_input.split(",") if clave.strip()]
-        
-        respuesta_exitosa = False
-        ultimo_error = ""
-        
-        # Iteramos sobre cada clave disponible hasta que una funcione
-        for i, clave_actual in enumerate(lista_claves):
-            try:
-                # Registramos la clave actual en el entorno del sistema
-                os.environ["GEMINI_API_KEY"] = clave_actual
-                
-                # Inicializamos el cliente oficial de Google GenAI
-                cliente_ia = genai.Client()
-                
-                contexto = f"""
-                Eres un asistente experto de Recursos Humanos. Responde de forma muy amable.
-                Usa ÚNICAMENTE esta información del manual de la empresa para responder. Si no viene en el texto, di que no cuentas con la información.
-                
-                MANUAL:
-                {texto_manual}
-                
-                PREGUNTA:
-                {pregunta}
-                """
-                
-                # Intentamos la generación de contenido con el modelo estándar
-                respuesta = cliente_ia.models.generate_content(
-                    model='gemini-2.0-flash',
-                    contents=contexto
-                )
-                
-                # Si llegamos aquí, la petición fue exitosa
-                st.chat_message("assistant").markdown(respuesta.text)
-                st.session_state.historial.append({"rol": "assistant", "texto": respuesta.text})
-                respuesta_exitosa = True
-                break  # Salimos del bucle de claves al tener éxito
-                
-            except Exception as e:
-                # Guardamos el error y continuamos con la siguiente clave de la lista
-                ultimo_error = str(e)
-                continue
-        
-        # Si recorrimos todas las claves y ninguna funcionó
-        if not respuesta_exitosa:
-            if "429" in ultimo_error or "RESOURCE_EXHAUSTED" in ultimo_error:
-                msg_fallo = "❌ Todas las claves introducidas han agotado su límite de cuota diario. Por favor, introduce una clave nueva o espera a que se reinicie el servicio."
-            else:
-                msg_fallo = f"❌ Error de comunicación: {ultimo_error}."
-                
+        try:
+            # Configuración de la clave e inicialización del cliente de IA
+            os.environ["GEMINI_API_KEY"] = api_key_usuario.strip()
+            cliente_ia = genai.Client()
+            
+            contexto = f"""
+            Eres un asistente experto de Recursos Humanos. Responde de forma muy amable.
+            Usa ÚNICAMENTE esta información del manual de la empresa para responder. Si no viene en el texto, di que no cuentas con la información.
+            
+            MANUAL:
+            {texto_manual}
+            
+            PREGUNTA:
+            {pregunta}
+            """
+            
+            # Petición al modelo oficial estable
+            respuesta = cliente_ia.models.generate_content(
+                model='gemini-2.0-flash',
+                contents=contexto
+            )
+            
+            # Mostramos la respuesta del asistente en pantalla
+            st.chat_message("assistant").markdown(respuesta.text)
+            st.session_state.historial.append({"rol": "assistant", "texto": respuesta.text})
+            
+        except Exception as error_general:
+            msg_fallo = f"❌ Error de comunicación: {str(error_general)}."
             st.chat_message("assistant").markdown(msg_fallo)
             st.session_state.historial.append({"rol": "assistant", "texto": msg_fallo})
