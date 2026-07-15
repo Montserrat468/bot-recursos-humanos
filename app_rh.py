@@ -64,9 +64,9 @@ if pregunta:
             PREGUNTA:
             {pregunta}
             """
-            
+            # El modelo insignia definitivo para la API moderna v1
             respuesta = cliente_ia.models.generate_content(
-                model='gemini-1.5-flash',
+                model='gemini-2.5-flash',
                 contents=contexto
             )
             
